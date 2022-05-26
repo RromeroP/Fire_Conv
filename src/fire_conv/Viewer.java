@@ -15,7 +15,6 @@ import java.awt.image.BufferedImage;
 public class Viewer extends Canvas {
 
     BufferedImage conv_bg;
-    private Fire fire;
 
     BufferedImage bg;
     double[][] filter;
@@ -30,9 +29,8 @@ public class Viewer extends Canvas {
         th = new Thread(() -> {
             while (running) {
                 try {
-                    if (fire.getMapaTemperatura() != null && bg != null) {
-                        setBackground(bg, filter);
-                    }
+                    setBackground(bg, filter);
+
                     try {
                         Thread.sleep(50);
                     } catch (InterruptedException ex) {
@@ -65,12 +63,6 @@ public class Viewer extends Canvas {
 
         conv_bg = new Image_Conv(bg, filter).getNew_img();
         this.getGraphics().drawImage(conv_bg, (int) (this.getWidth() * 0.33), 0, (int) (this.getWidth() * 0.33), (int) (this.getHeight() * 0.33), null);
-    }
-
-    public void setFire(Fire fire) {
-        this.fire = fire;
-        this.fire.setMapaTemperatura(new int[this.getHeight()][this.getWidth()]);
-        this.fire.setMapaTemperatura2(new int[this.getHeight()][this.getWidth()]);
     }
 
 }

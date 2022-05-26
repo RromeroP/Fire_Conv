@@ -19,7 +19,6 @@ public class Fire_Conv extends JFrame {
      */
     ControlPanel controlPanel;
     Viewer viewer;
-    Fire fire;
 
     public static void main(String[] args) {
         // TODO code application logic here
@@ -53,8 +52,6 @@ public class Fire_Conv extends JFrame {
     }
 
     private void createFire() {
-        this.fire = new Fire(this.getViewer().getWidth(), this.getViewer().getHeight(), this);
-        this.viewer.setFire(this.fire);
     }
 
     private void initComponents() {
@@ -68,7 +65,4 @@ public class Fire_Conv extends JFrame {
         this.setVisible(true);
     }
 
-    public Fire getFire() {
-        return fire;
-    }
 }

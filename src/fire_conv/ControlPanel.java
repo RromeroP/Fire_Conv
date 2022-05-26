@@ -156,8 +156,6 @@ public class ControlPanel extends JPanel implements ActionListener {
         }
 
         if (event.getActionCommand().equals("Play")) {
-            fire_conv.getFire().setRunning(true);
-            fire_conv.getFire().run();
         }
 
         if (event.getActionCommand().equals("Apply")) {
