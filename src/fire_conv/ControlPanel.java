@@ -20,13 +20,15 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
  * @author Rubén
  */
-public class ControlPanel extends JPanel implements ActionListener {
+public class ControlPanel extends JPanel implements ActionListener, ChangeListener {
 
     private JButton load;
     private JButton play;
@@ -47,11 +49,15 @@ public class ControlPanel extends JPanel implements ActionListener {
     private JFileChooser fileExplorer;
 
     private final Fire_Conv fire_conv;
+    Fire fire;
+
+    int fire_fps;
 
     BufferedImage image;
 
     public ControlPanel(Fire_Conv PRUEBA) {
         this.fire_conv = PRUEBA;
+        this.fire = fire_conv.fire;
         this.setLayout(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
@@ -85,10 +91,13 @@ public class ControlPanel extends JPanel implements ActionListener {
         this.positionComponent(0, 3, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, play);
         this.play.addActionListener(this);
         this.positionComponent(1, 3, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, pause);
+        this.pause.addActionListener(this);
         this.positionComponent(2, 3, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, stop);
+        this.stop.addActionListener(this);
 
         this.positionComponent(0, 4, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, frames);
         this.positionComponent(0, 5, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, slider);
+        this.slider.addChangeListener(this);
 
         this.positionComponent(0, 6, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, filters);
         this.positionComponent(0, 7, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, dropdown);
@@ -129,7 +138,7 @@ public class ControlPanel extends JPanel implements ActionListener {
             ImageIcon imageIcon = new ImageIcon(this.fileExplorer.getSelectedFile().getAbsolutePath());
 
             image = new BufferedImage(imageIcon.getIconWidth(), imageIcon.getIconHeight(),
-                    BufferedImage.TYPE_INT_RGB);
+                    BufferedImage.TYPE_INT_ARGB);
 
             Graphics g = image.createGraphics();
 
@@ -156,6 +165,21 @@ public class ControlPanel extends JPanel implements ActionListener {
         }
 
         if (event.getActionCommand().equals("Play")) {
+            if (!this.fire.fireThread.isAlive()) {
+                this.fire.setFps(this.fire_fps);
+                this.fire.fireThread.start();
+            }
+            this.fire.setRunning(true);
+            this.fire.setPaused(false);
+        }
+
+        if (event.getActionCommand().equals("Pause")) {
+            this.fire.setPaused(true);
+        }
+
+        if (event.getActionCommand().equals("Stop")) {
+            this.fire.setRunning(false);
+            this.fire.newThread();
         }
 
         if (event.getActionCommand().equals("Apply")) {
@@ -187,6 +211,17 @@ public class ControlPanel extends JPanel implements ActionListener {
         }
         return VERTICAL;
 
+    }
+
+    @Override
+    public void stateChanged(ChangeEvent event) {
+        if (event.getSource() instanceof JSlider) {
+            JSlider jslider = (JSlider) event.getSource();
+            if (jslider == this.slider) {
+                this.fire_fps = slider.getValue();
+                this.fire.setFps(this.fire_fps);
+            }
+        }
     }
 
 }

@@ -19,6 +19,7 @@ public class Fire_Conv extends JFrame {
      */
     ControlPanel controlPanel;
     Viewer viewer;
+    Fire fire;
 
     public static void main(String[] args) {
         // TODO code application logic here
@@ -59,6 +60,7 @@ public class Fire_Conv extends JFrame {
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.viewer = new Viewer();
+        this.fire = new Fire();
         this.controlPanel = new ControlPanel(this);
         this.addPanels();
         this.setLocationRelativeTo(null);

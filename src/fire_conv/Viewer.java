@@ -19,14 +19,14 @@ public class Viewer extends Canvas {
     BufferedImage bg;
     double[][] filter;
 
-    Thread th;
+    Thread viewerThread;
 
     boolean running = false;
 
     public Viewer() {
         this.setBackground(Color.BLACK);
 
-        th = new Thread(() -> {
+        viewerThread = new Thread(() -> {
             while (running) {
                 try {
                     setBackground(bg, filter);
@@ -52,17 +52,21 @@ public class Viewer extends Canvas {
 
         if (!running) {
             this.running = true;
-            th.start();
+            viewerThread.start();
         }
 
-        //Main Image
-        this.getGraphics().drawImage(bg, 0, (int) (this.getHeight() * 0.33), this.getWidth(), (int) (this.getHeight() * 0.67), null);
-        //Original Image
-        this.getGraphics().drawImage(bg, 0, 0, (int) (this.getWidth() * 0.33), (int) (this.getHeight() * 0.33), null);
-        //Conv Image
+        if (bg != null) {
+            //Main Image
+            this.getGraphics().drawImage(bg, 0, (int) (this.getHeight() * 0.33), this.getWidth(), (int) (this.getHeight() * 0.67), null);
+            //Original Image
+            this.getGraphics().drawImage(bg, 0, 0, (int) (this.getWidth() * 0.33), (int) (this.getHeight() * 0.33), null);
+            //Conv Image
+            conv_bg = new Image_Conv(bg, filter).getNew_img();
+            this.getGraphics().drawImage(conv_bg, (int) (this.getWidth() * 0.33), 0, (int) (this.getWidth() * 0.33), (int) (this.getHeight() * 0.33), null);
+            //Fire
 
-        conv_bg = new Image_Conv(bg, filter).getNew_img();
-        this.getGraphics().drawImage(conv_bg, (int) (this.getWidth() * 0.33), 0, (int) (this.getWidth() * 0.33), (int) (this.getHeight() * 0.33), null);
+            this.getGraphics().drawImage(conv_bg, (int) (this.getWidth() * 0.67), 0, (int) (this.getWidth() * 0.33), (int) (this.getHeight() * 0.33), null);
+        }
     }
 
 }
