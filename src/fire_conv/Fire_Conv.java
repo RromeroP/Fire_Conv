@@ -59,8 +59,8 @@ public class Fire_Conv extends JFrame {
         this.setSize(800, 800);
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.viewer = new Viewer();
-        this.fire = new Fire();
+        this.viewer = new Viewer(this);
+        this.fire = new Fire(this);
         this.controlPanel = new ControlPanel(this);
         this.addPanels();
         this.setLocationRelativeTo(null);

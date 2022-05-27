@@ -23,21 +23,18 @@ public class Viewer extends Canvas {
 
     boolean running = false;
 
-    public Viewer() {
+    Fire_Conv PRUEBA;
+
+    boolean first = true;
+
+    public Viewer(Fire_Conv PRUEBA) {
         this.setBackground(Color.BLACK);
+        this.PRUEBA = PRUEBA;
 
         viewerThread = new Thread(() -> {
             while (running) {
-                try {
-                    setBackground(bg, filter);
+                setBackground(bg, filter);
 
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException ex) {
-                        System.out.println(ex.getMessage());
-                    }
-                } catch (Exception ex) {
-                }
             }
         });
     }
@@ -56,16 +53,21 @@ public class Viewer extends Canvas {
         }
 
         if (bg != null) {
-            //Main Image
-            this.getGraphics().drawImage(bg, 0, (int) (this.getHeight() * 0.33), this.getWidth(), (int) (this.getHeight() * 0.67), null);
+            if (first == true || !PRUEBA.fire.isRunning()) {
+                //Main Image
+                this.getGraphics().drawImage(bg, 0, (int) (this.getHeight() * 0.33), this.getWidth(), (int) (this.getHeight() * 0.67), null);
+                first = false;
+            }
             //Original Image
             this.getGraphics().drawImage(bg, 0, 0, (int) (this.getWidth() * 0.33), (int) (this.getHeight() * 0.33), null);
             //Conv Image
-            conv_bg = new Image_Conv(bg, filter).getNew_img();
+            this.conv_bg = new Image_Conv(bg, filter).getNew_img();
             this.getGraphics().drawImage(conv_bg, (int) (this.getWidth() * 0.33), 0, (int) (this.getWidth() * 0.33), (int) (this.getHeight() * 0.33), null);
             //Fire
+            BufferedImage fire_bg = PRUEBA.fire.getFlame_i();
+            this.getGraphics().drawImage(fire_bg, (int) (this.getWidth() * 0.67), 0, (int) (this.getWidth() * 0.34), (int) (this.getHeight() * 0.33), null);
 
-            this.getGraphics().drawImage(conv_bg, (int) (this.getWidth() * 0.67), 0, (int) (this.getWidth() * 0.33), (int) (this.getHeight() * 0.33), null);
+            this.getGraphics().drawImage(fire_bg, 0, (int) (this.getHeight() * 0.33), this.getWidth(), (int) (this.getHeight() * 0.67), null);
         }
     }
 

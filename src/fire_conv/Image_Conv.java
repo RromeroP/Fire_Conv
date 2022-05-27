@@ -82,7 +82,7 @@ public class Image_Conv {
     }
 
     private BufferedImage createImageFromConvolutionMatrix(BufferedImage originalImage, double[][] imageRGB) throws IOException {
-        BufferedImage writeBackImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+        BufferedImage writeBackImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
         for (int i = 0; i < imageRGB.length; i++) {
             for (int j = 0; j < imageRGB[i].length; j++) {
                 Color color = new Color(fixOutOfRangeRGBValues(imageRGB[i][j]),

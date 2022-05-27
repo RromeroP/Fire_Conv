@@ -138,7 +138,7 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
             ImageIcon imageIcon = new ImageIcon(this.fileExplorer.getSelectedFile().getAbsolutePath());
 
             image = new BufferedImage(imageIcon.getIconWidth(), imageIcon.getIconHeight(),
-                    BufferedImage.TYPE_INT_ARGB);
+                    BufferedImage.TYPE_4BYTE_ABGR);
 
             Graphics g = image.createGraphics();
 
