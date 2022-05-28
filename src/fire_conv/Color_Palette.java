@@ -141,4 +141,23 @@ public class Color_Palette {
         usePalette(colors);
     }
 
+    public void setColors(Color[] colors_temp) {
+        this.palette = new ArrayList<>();
+
+        Color color1 = new Color(colors_temp[0].getRed(), colors_temp[0].getGreen(), colors_temp[0].getBlue(), 0);
+        Color color2 = new Color(colors_temp[1].getRed(), colors_temp[1].getGreen(), colors_temp[1].getBlue(), 150);
+        Color color3 = new Color(colors_temp[2].getRed(), colors_temp[2].getGreen(), colors_temp[2].getBlue(), 175);
+        Color color4 = new Color(colors_temp[3].getRed(), colors_temp[3].getGreen(), colors_temp[3].getBlue(), 200);
+        Color color5 = new Color(colors_temp[4].getRed(), colors_temp[4].getGreen(), colors_temp[4].getBlue(), 255);
+
+        Color[] colors_final = {
+            color1,
+            color2,
+            color3,
+            color4,
+            color5
+        };
+        
+        usePalette(colors_final);
+    }
 }
