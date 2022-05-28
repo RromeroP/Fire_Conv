@@ -15,11 +15,15 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -35,16 +39,28 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
     private JButton pause;
     private JButton stop;
     private JButton apply_filter;
+    private JButton palette;
 
     private JLabel background;
     private JLabel controls;
     private JLabel frames;
+    private JLabel tolerance;
     private JLabel filters;
+    private JLabel spark_label;
+    private JLabel cool_label;
 
-    private JSlider slider;
+    private JSlider fps_slider;
+    private JSlider tolerance_slider;
+
+    private JCheckBox apply_conv;
+
+    private JSpinner sparks;
+    private JSpinner cool;
 
     String[] filter_options = {"VERTICAL", "HORIZONTAL", "SOBEL_V", "SOBEL_H", "SCHARR_V", "SCHARR_H"};
     JComboBox<String> dropdown;
+    String[] filter_palette = {"Real", "Green", "Blue", "Purple", "White", "Black"};
+    JComboBox<String> palette_dropdown;
 
     private JFileChooser fileExplorer;
 
@@ -52,6 +68,7 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
     Fire fire;
 
     int fire_fps;
+    int fire_tolerance;
 
     BufferedImage image;
 
@@ -77,9 +94,22 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 
         this.frames = new JLabel("FIRE FRAMES");
 
+        this.tolerance = new JLabel("TOLERANCE");
+
         this.filters = new JLabel("EDGE FILTERS");
         this.dropdown = new JComboBox<>(filter_options);
         this.apply_filter = new JButton("Apply");
+
+        this.spark_label = new JLabel("Sparks (1-100)");
+        this.sparks = new JSpinner(new SpinnerNumberModel(30, 1, 100, 1));
+
+        this.cool_label = new JLabel("Cool (0-3)");
+        this.cool = new JSpinner(new SpinnerNumberModel(0.1, 0, 3, 0.05));
+
+        this.apply_conv = new JCheckBox("Apply convolution", false);
+
+        this.palette_dropdown = new JComboBox<>(filter_palette);
+        this.palette = new JButton("Apply Palette");
 
         initSliders();
 
@@ -96,13 +126,32 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
         this.stop.addActionListener(this);
 
         this.positionComponent(0, 4, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, frames);
-        this.positionComponent(0, 5, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, slider);
-        this.slider.addChangeListener(this);
+        this.positionComponent(0, 5, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, fps_slider);
+        this.fps_slider.addChangeListener(this);
 
-        this.positionComponent(0, 6, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, filters);
-        this.positionComponent(0, 7, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, dropdown);
-        this.positionComponent(2, 7, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, apply_filter);
+        this.positionComponent(0, 6, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, tolerance);
+        this.positionComponent(0, 7, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, tolerance_slider);
+        this.tolerance_slider.addChangeListener(this);
+
+        this.positionComponent(0, 8, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, filters);
+        this.positionComponent(0, 9, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, dropdown);
+        this.positionComponent(2, 9, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, apply_filter);
         this.apply_filter.addActionListener(this);
+
+        this.positionComponent(0, 10, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, sparks);
+        this.sparks.addChangeListener(this);
+        this.positionComponent(1, 10, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, spark_label);
+
+        this.positionComponent(0, 11, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, cool);
+        this.cool.addChangeListener(this);
+        this.positionComponent(1, 11, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, cool_label);
+
+        this.positionComponent(0, 12, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, apply_conv);
+        this.apply_conv.addActionListener(this);
+
+        this.positionComponent(0, 13, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, palette_dropdown);
+        this.positionComponent(2, 13, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, palette);
+        this.palette.addActionListener(this);
 
     }
 
@@ -121,12 +170,19 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
     }
 
     private void initSliders() {
-        this.slider = new JSlider(10, 60, 30);
-        this.slider.setMinorTickSpacing(5);
-        this.slider.setMajorTickSpacing(5);
-        this.slider.setPaintTicks(true);
-        this.slider.setPaintLabels(true);
-        this.slider.setForeground(Color.BLACK);
+        this.fps_slider = new JSlider(10, 60, 30);
+        this.fps_slider.setMinorTickSpacing(5);
+        this.fps_slider.setMajorTickSpacing(5);
+        this.fps_slider.setPaintTicks(true);
+        this.fps_slider.setPaintLabels(true);
+        this.fps_slider.setForeground(Color.BLACK);
+
+        this.tolerance_slider = new JSlider(50, 200, 100);
+        this.tolerance_slider.setMinorTickSpacing(5);
+        this.tolerance_slider.setMajorTickSpacing(25);
+        this.tolerance_slider.setPaintTicks(true);
+        this.tolerance_slider.setPaintLabels(true);
+        this.tolerance_slider.setForeground(Color.BLACK);
     }
 
     private void addBackground(double[][] img_filter) {
@@ -138,7 +194,7 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
             ImageIcon imageIcon = new ImageIcon(this.fileExplorer.getSelectedFile().getAbsolutePath());
 
             image = new BufferedImage(imageIcon.getIconWidth(), imageIcon.getIconHeight(),
-                    BufferedImage.TYPE_4BYTE_ABGR);
+                    BufferedImage.TYPE_INT_ARGB);
 
             Graphics g = image.createGraphics();
 
@@ -147,7 +203,7 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
             g.dispose();
 
             if (image.getHeight(null) <= 0 || image.getWidth(null) <= 0) {
-                /*fire_conv.getViewer().setBackground(null);*/
+                fire_conv.getViewer().setBackground(null);
             } else {
 
                 fire_conv.getViewer().setBackground(image, img_filter);
@@ -162,15 +218,21 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 
         if (event.getActionCommand().equals("Load Image")) {
             this.addBackground(checkDropdown(option));
+            this.fire_conv.viewer.setFirst(true);
         }
 
         if (event.getActionCommand().equals("Play")) {
-            if (!this.fire.fireThread.isAlive()) {
-                this.fire.setFps(this.fire_fps);
-                this.fire.fireThread.start();
+            if (this.image != null) {
+
+                if (!this.fire.fireThread.isAlive()) {
+                    this.fire.setFps(this.fire_fps);
+                    this.fire.fireThread.start();
+                }
+                this.fire.setRunning(true);
+                this.fire.setPaused(false);
+            } else {
+                JOptionPane.showMessageDialog(null, "Load an image first.");
             }
-            this.fire.setRunning(true);
-            this.fire.setPaused(false);
         }
 
         if (event.getActionCommand().equals("Pause")) {
@@ -180,10 +242,21 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
         if (event.getActionCommand().equals("Stop")) {
             this.fire.setRunning(false);
             this.fire.newThread();
+            this.fire_conv.viewer.setFirst(true);
         }
 
         if (event.getActionCommand().equals("Apply")) {
             fire_conv.getViewer().setBackground(image, checkDropdown(option));
+            this.fire_conv.viewer.setFirst(true);
+        }
+
+        if (event.getActionCommand().equals("Apply convolution")) {
+            this.fire.setApply_conv(apply_conv.getModel().isSelected());
+        }
+
+        option = (String) palette_dropdown.getSelectedItem();
+        if (event.getActionCommand().equals("Apply Palette")) {
+            this.fire.palette.setColors(option);
         }
 
     }
@@ -217,9 +290,31 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
     public void stateChanged(ChangeEvent event) {
         if (event.getSource() instanceof JSlider) {
             JSlider jslider = (JSlider) event.getSource();
-            if (jslider == this.slider) {
-                this.fire_fps = slider.getValue();
+
+            if (jslider == this.fps_slider) {
+
+                this.fire_fps = fps_slider.getValue();
                 this.fire.setFps(this.fire_fps);
+
+            } else if (jslider == this.tolerance_slider) {
+
+                this.fire_tolerance = tolerance_slider.getValue();
+                this.fire.setTolerance(this.fire_tolerance);
+
+            }
+        }
+
+        if (event.getSource() instanceof JSpinner) {
+            JSpinner jspinner = (JSpinner) event.getSource();
+
+            if (jspinner == this.sparks) {
+                this.fire.setSpark_chance((int) this.sparks.getValue());
+
+            }
+
+            if (jspinner == this.cool) {
+                this.fire.setCooling((double) this.cool.getValue());
+
             }
         }
     }

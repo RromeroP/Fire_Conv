@@ -33,8 +33,8 @@ public class Viewer extends Canvas {
         this.setBackground(Color.BLACK);
         this.PRUEBA = PRUEBA;
         viewerThread = new Thread(() -> {
-        paintViewer();
-            while (running) {
+            paintViewer();
+            while (true) {
 
                 setBackground(bg, filter);
 
@@ -56,6 +56,8 @@ public class Viewer extends Canvas {
     }
 
     public void setBackground(BufferedImage img_bg, double[][] img_filter) {
+        paintViewer();
+
         this.bg = img_bg;
         this.filter = img_filter;
 
@@ -63,7 +65,7 @@ public class Viewer extends Canvas {
             this.running = true;
             viewerThread.start();
         }
-        
+
         Graphics g = bs.getDrawGraphics();
 
         if (bg != null) {
@@ -82,15 +84,19 @@ public class Viewer extends Canvas {
             g.drawImage(conv_bg, (int) (this.getWidth() * 0.33), 0, (int) (this.getWidth() * 0.33), (int) (this.getHeight() * 0.33), null);
 
             //Fire
-            BufferedImage fire_bg = PRUEBA.fire.getFlame_i();
-            g.drawImage(PRUEBA.fire.default_img, (int) (this.getWidth() * 0.67), 0, (int) (this.getWidth() * 0.34), (int) (this.getHeight() * 0.33), null);
-            g.drawImage(fire_bg, (int) (this.getWidth() * 0.67), 0, (int) (this.getWidth() * 0.34), (int) (this.getHeight() * 0.33), null);
-            g.drawImage(fire_bg, 0, (int) (this.getHeight() * 0.33), this.getWidth(), (int) (this.getHeight() * 0.67), null);
+            if (PRUEBA.fire.isRunning()) {
+                BufferedImage fire_bg = PRUEBA.fire.getFlame_i();
+                g.drawImage(PRUEBA.fire.default_img, (int) (this.getWidth() * 0.67), 0, (int) (this.getWidth() * 0.34), (int) (this.getHeight() * 0.33), null);
+                g.drawImage(fire_bg, (int) (this.getWidth() * 0.67), 0, (int) (this.getWidth() * 0.34), (int) (this.getHeight() * 0.33), null);
+                g.drawImage(fire_bg, 0, (int) (this.getHeight() * 0.33), this.getWidth(), (int) (this.getHeight() * 0.67), null);
+            } else {
+                g.drawImage(PRUEBA.fire.default_img, (int) (this.getWidth() * 0.67), 0, (int) (this.getWidth() * 0.34), (int) (this.getHeight() * 0.33), null);
+            }
 
         }
-        
+
         g.dispose();
-        
+
         bs.show();
     }
 
@@ -98,14 +104,11 @@ public class Viewer extends Canvas {
         BufferStrategy buffers;
         buffers = this.getBufferStrategy();
         if (buffers == null) {
-            System.out.println("ERROR, kgd");
             this.createBufferStrategy(3);
             buffers = this.getBufferStrategy();
         }
 
-        if (this.getParent() == null) {
-            System.out.println("ERROR, kgd 2");
-        } else {
+        if (this.getParent() != null) {
             this.bs = buffers;
         }
     }

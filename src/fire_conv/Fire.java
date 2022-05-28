@@ -4,6 +4,7 @@
  */
 package fire_conv;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
@@ -25,9 +26,17 @@ public final class Fire {
     Thread fireThread;
 
     BufferedImage image;
+    BufferedImage default_img;
 
+    ;
     public Fire(Fire_Conv PRUEBA) {
         this.PRUEBA = PRUEBA;
+        try {
+            this.default_img = ImageIO.read(new File("src\\images\\blackBG.png"));
+        } catch (IOException ex) {
+            System.out.println(ex);
+        }
+        this.palette = new Color_Palette();
         newThread();
     }
 
@@ -60,16 +69,21 @@ public final class Fire {
 
             this.temperature = new int[WIDTH][HEIGHT];
 
-            this.flame_i = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_4BYTE_ABGR);
-
             this.image_buffer = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+
+            this.flame_i = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_4BYTE_ABGR);
             this.buffer = ((DataBufferByte) flame_i.getRaster().getDataBuffer()).getData();
 
             while (running) {
                 try {
                     if (!paused) {
                         //FIRE HERE
-                        imageSparks();
+                        if (apply_conv) {
+                            this.image = PRUEBA.viewer.getConv_bg();
+                            imageSparks();
+                        } else {
+                            createSparks();
+                        }
                         flameEvolve();
                     }
                     try {
@@ -80,17 +94,13 @@ public final class Fire {
                 } catch (Exception ex) {
                 }
             }
-
-            try {
-                this.flame_i = ImageIO.read(new File("src\\images\\blackBG.png"));
-            } catch (IOException ex) {
-                System.out.println(ex.getMessage());
-            }
+            this.flame_i = this.default_img;
         });
-    }
 
+    }
     //FIRE
     Fire_Conv PRUEBA;
+    Color_Palette palette;
 
     int WIDTH;
     int HEIGHT;
@@ -100,21 +110,40 @@ public final class Fire {
     byte[] buffer;
     byte[] image_buffer;
 
-    float cooling;
-    int spark_chance = 50;
+    float cooling = 0.1f;
+    int spark_chance = 30;
 
     Random rand = new Random();
+
+    int tolerance = 100;
+
+    boolean apply_conv = false;
+
+    public void setApply_conv(boolean apply_conv) {
+        this.flame_i = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
+
+        this.apply_conv = apply_conv;
+    }
 
     public BufferedImage getFlame_i() {
         return flame_i;
     }
 
-    public void setCooling(float cooling) {
-        this.cooling = cooling;
+    public void setCooling(double cooling) {
+
+        this.cooling = (float) cooling;
     }
 
     public void setSpark_chance(int spark_chance) {
         this.spark_chance = spark_chance;
+    }
+
+    public void setTolerance(int tolerance) {
+        this.tolerance = tolerance;
+    }
+
+    public void resetTemperature() {
+        this.temperature = new int[WIDTH][HEIGHT];
     }
 
     private void calcular(int[][] temperature) {
@@ -135,8 +164,6 @@ public final class Fire {
 
                 int avg = (up + left + right + down) / 4;
 
-                cooling = 0.1f;
-
                 avg -= cooling;
 
                 if (avg < 0) {
@@ -153,84 +180,53 @@ public final class Fire {
     }
 
     public void flameEvolve() {
+
         calcular(this.temperature);
 
-        final int pixelLength = 4;
-        for (int pixel = 0, row = 0, col = 0;
-                pixel + 3 < this.buffer.length; pixel += pixelLength) {
+        for (int x = 0; x < temperature.length; x++) {
+            for (int y = 0; y < temperature[0].length; y++) {
+                flame_i.setRGB(x, y, palette.getColor(temperature[x][y]).getRGB());
 
-            //Aqui iria la paleta de colores
-            if (temperature[col][row] < 150) {
-                buffer[pixel] = (byte) temperature[col][row]; // alpha
-            } else {
-                buffer[pixel] = (byte) 255; // alpha
-            }
-            
-            buffer[pixel + 1] = (byte) 0; // blue
-            buffer[pixel + 2] = (byte) 0; // green
-            buffer[pixel + 3] = (byte) temperature[col][row]; // red
-
-            //Usamos esto para encontrar las colummnas y lines en el array
-            col++;
-            if (col == this.WIDTH) {
-
-                col = 0;
-                row++;
             }
         }
     }
 
     public void createSparks() {
 
-        final int pixelLength = 4;
-        for (int pixel = 0, row = 0, col = 0;
-                pixel + 3 < this.buffer.length; pixel += pixelLength) {
+        for (int x = 0; x < temperature.length; x++) {
+            for (int y = 0; y < temperature[0].length; y++) {
 
-            if (row == this.HEIGHT - 2) {
+                if (y == this.HEIGHT - 2) {
+                    int random = rand.nextInt(100);
 
-                int random = rand.nextInt(100);
+                    if (random <= spark_chance) {
 
-                if (random < spark_chance) {
-                    temperature[col][row] = 255;
+                        temperature[x][y] = 255;
 
+                    }
                 }
-            }
-
-            //Usamos esto para encontrar las colummnas y lines en el array
-            col++;
-            if (col == this.WIDTH) {
-
-                col = 0;
-                row++;
             }
         }
     }
 
     public void imageSparks() {
-        int pixel_value;
+        Color pixel_color;
 
-        final int pixelLength = 4;
-        for (int pixel = 0, row = 0, col = 0;
-                pixel + 3 < this.image_buffer.length; pixel += pixelLength) {
+        for (int x = 0; x < temperature.length; x++) {
+            for (int y = 0; y < temperature[0].length; y++) {
 
-            pixel_value = (image_buffer[pixel + 1] + image_buffer[pixel + 2] + image_buffer[pixel + 3]) / 3;
+                pixel_color = new Color(image.getRGB(x, y), true);
 
-            if (pixel_value >= 100) {
-                int random = rand.nextInt(100);
+                if (pixel_color.getRed() + pixel_color.getGreen() + pixel_color.getBlue() / 3 >= tolerance) {
 
-                if (random < spark_chance) {
+                    int random = rand.nextInt(100);
 
-                    temperature[col][row] = 255;
+                    if (random <= spark_chance) {
 
+                        temperature[x][y] = 255;
+
+                    }
                 }
-            }
-
-            //Usamos esto para encontrar las colummnas y lines en el array
-            col++;
-            if (col == this.WIDTH) {
-
-                col = 0;
-                row++;
             }
         }
     }
