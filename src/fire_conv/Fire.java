@@ -94,6 +94,7 @@ public final class Fire {
                 } catch (Exception ex) {
                 }
             }
+            System.out.println("a");
             this.flame_i = this.default_img;
         });
 
@@ -121,7 +122,6 @@ public final class Fire {
 
     public void setApply_conv(boolean apply_conv) {
         this.flame_i = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
-
         this.apply_conv = apply_conv;
     }
 

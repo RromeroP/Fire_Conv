@@ -218,6 +218,9 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 
         if (event.getActionCommand().equals("Load Image")) {
             this.addBackground(checkDropdown(option));
+            
+            this.fire.setRunning(false);
+            this.fire.newThread();
             this.fire_conv.viewer.setFirst(true);
         }
 
