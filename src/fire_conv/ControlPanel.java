@@ -4,8 +4,10 @@
  */
 package fire_conv;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -22,6 +24,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -60,14 +64,21 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
     private JLabel empty3;
     private JLabel empty4;
     private JLabel empty5;
+    private JLabel fire_label;
+    private JLabel color_label;
+    private JLabel conv_label;
 
     private JSlider fps_slider;
     private JSlider tolerance_slider;
 
-    private JCheckBox apply_conv;
+    public JCheckBox apply_conv;
 
     private JSpinner sparks;
     private JSpinner cool;
+
+    private JSeparator separator1;
+    private JSeparator separator2;
+    private JSeparator separator3;
 
     String[] filter_options = {"VERTICAL", "HORIZONTAL", "SOBEL_V", "SOBEL_H", "SCHARR_V", "SCHARR_H"};
     JComboBox<String> dropdown;
@@ -84,6 +95,9 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
 
     BufferedImage image;
 
+    Color dark = new Color(27, 27, 27);
+    Color light = new Color(227, 227, 227);
+
     public ControlPanel(Fire_Conv PRUEBA) {
         this.fire_conv = PRUEBA;
         this.fire = fire_conv.fire;
@@ -92,25 +106,56 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
         GridBagConstraints c = new GridBagConstraints();
 
         initComponents(c);
+    }
 
+    private void formatJ(JLabel label) {
+        label.setFont(new Font("Arial", Font.BOLD, 15));
+        label.setForeground(light);
+    }
+
+    private void formatJ(JButton button) {
+        button.setFont(new Font("Arial", Font.BOLD, 13));
+        button.setForeground(light);
+    }
+
+    private void formatJ2(JLabel label) {
+        label.setFont(new Font("Arial", Font.BOLD, 12));
+        label.setForeground(light);
+    }
+
+    private void formatJ2(JCheckBox box) {
+        box.setFont(new Font("Arial", Font.BOLD, 12));
+        box.setForeground(light);
+    }
+
+    private void formatJ3(JLabel label) {
+        label.setFont(new Font("Arial", Font.BOLD, 24));
+        label.setForeground(light);
     }
 
     private void initComponents(GridBagConstraints c) {
         this.background = new JLabel("SELECT BACKGROUND");
+        formatJ(background);
         this.load = new JButton("Load Image");
+        formatJ(load);
+
+        this.fire_label = new JLabel("FIRE");
+        formatJ3(fire_label);
+
+        this.separator1 = new JSeparator();
+        separator1.setBackground(light);
 
         this.controls = new JLabel("CONTROLS");
+        formatJ(controls);
         this.play = new JButton("Play");
+        formatJ(play);
         this.pause = new JButton("Pause");
+        formatJ(pause);
         this.stop = new JButton("Stop");
+        formatJ(stop);
 
         this.frames = new JLabel("FIRE FRAMES");
-
-        this.tolerance = new JLabel("TOLERANCE");
-
-        this.filters = new JLabel("EDGE FILTERS");
-        this.dropdown = new JComboBox<>(filter_options);
-        this.apply_filter = new JButton("Apply");
+        formatJ(frames);
 
         this.spark_label = new JLabel("Sparks (1-100)");
         this.sparks = new JSpinner(new SpinnerNumberModel(30, 1, 100, 1));
@@ -118,10 +163,15 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
         this.cool_label = new JLabel("Cooling (0-3)");
         this.cool = new JSpinner(new SpinnerNumberModel(0.1, 0, 3, 0.05));
 
-        this.apply_conv = new JCheckBox("Apply Convolution", false);
+        this.color_label = new JLabel("COLORS");
+        formatJ3(color_label);
+
+        this.separator2 = new JSeparator();
+        separator2.setBackground(light);
 
         this.palette_dropdown = new JComboBox<>(filter_palette);
         this.palette = new JButton("Apply Palette");
+        formatJ(palette);
 
         this.color1 = new JButton("Color 1");
         this.color2 = new JButton("Color 2");
@@ -133,7 +183,30 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
         this.empty3 = new JLabel();
         this.empty4 = new JLabel();
         this.empty5 = new JLabel();
+        formatJ(color1);
+        formatJ(color2);
+        formatJ(color3);
+        formatJ(color4);
+        formatJ(color5);
         this.apply_custom = new JButton("Apply Custom Palette");
+        formatJ(apply_custom);
+
+        this.conv_label = new JLabel("CONVOLUTION");
+        formatJ3(conv_label);
+
+        this.separator3 = new JSeparator();
+        separator3.setBackground(light);
+
+        this.filters = new JLabel("EDGE FILTERS");
+        formatJ(filters);
+        this.dropdown = new JComboBox<>(filter_options);
+        this.apply_filter = new JButton("Apply Filter");
+        formatJ(apply_filter);
+
+        this.tolerance = new JLabel("TOLERANCE");
+        formatJ(tolerance);
+
+        this.apply_conv = new JCheckBox("Apply Convolution", false);
 
         initSliders();
 
@@ -141,74 +214,86 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
         this.positionComponent(0, 1, 3, 0, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, load);
         this.load.addActionListener(this);
 
-        this.positionComponent(0, 2, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, controls);
-        this.positionComponent(0, 3, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, play);
+        this.positionComponent(0, 2, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(30, 5, 5, 5), c, fire_label);
+        this.positionComponent(0, 3, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, separator1);
+
+        this.positionComponent(0, 4, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, controls);
+        this.positionComponent(0, 5, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, play);
         this.play.addActionListener(this);
-        this.positionComponent(1, 3, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, pause);
+        this.positionComponent(1, 5, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, pause);
         this.pause.addActionListener(this);
-        this.positionComponent(2, 3, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, stop);
+        this.positionComponent(2, 5, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, stop);
         this.stop.addActionListener(this);
 
-        this.positionComponent(0, 4, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, frames);
-        this.positionComponent(0, 5, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, fps_slider);
+        this.positionComponent(0, 6, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, frames);
+        this.positionComponent(0, 7, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, fps_slider);
         this.fps_slider.addChangeListener(this);
 
-        this.positionComponent(0, 6, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, tolerance);
-        this.positionComponent(0, 7, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, tolerance_slider);
-        this.tolerance_slider.addChangeListener(this);
-
-        this.positionComponent(0, 8, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, filters);
-        this.positionComponent(0, 9, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, dropdown);
-        this.positionComponent(2, 9, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, apply_filter);
-        this.apply_filter.addActionListener(this);
-
-        this.positionComponent(0, 10, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, sparks);
+        this.positionComponent(0, 8, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, sparks);
         this.sparks.addChangeListener(this);
-        this.positionComponent(1, 10, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, spark_label);
+        this.positionComponent(1, 8, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, spark_label);
+        formatJ2(spark_label);
 
-        this.positionComponent(0, 11, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, cool);
+        this.positionComponent(0, 9, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, cool);
         this.cool.addChangeListener(this);
-        this.positionComponent(1, 11, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, cool_label);
+        this.positionComponent(1, 9, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, cool_label);
+        formatJ2(cool_label);
 
-        this.positionComponent(0, 12, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, apply_conv);
-        this.apply_conv.addActionListener(this);
+        this.positionComponent(0, 10, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(30, 5, 5, 5), c, color_label);
+        this.positionComponent(0, 11, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, separator2);
 
-        this.positionComponent(0, 13, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, palette_dropdown);
-        this.positionComponent(2, 13, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, palette);
+        this.positionComponent(0, 12, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, palette_dropdown);
+        this.positionComponent(2, 12, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, palette);
         this.palette.addActionListener(this);
 
-        this.positionComponent(0, 14, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 0), c, color1);
+        this.positionComponent(0, 13, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 0, 0), c, color1);
         this.empty1.setBackground(Color.BLACK);
         this.empty1.setOpaque(true);
-        this.positionComponent(1, 14, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 0, 0, 5), c, empty1);
+        this.positionComponent(1, 13, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 0, 0, 5), c, empty1);
         this.color1.addActionListener(this);
 
-        this.positionComponent(0, 15, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), c, color2);
+        this.positionComponent(0, 14, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), c, color2);
         this.empty2.setBackground(Color.BLACK);
         this.empty2.setOpaque(true);
-        this.positionComponent(1, 15, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 5), c, empty2);
+        this.positionComponent(1, 14, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 5), c, empty2);
         this.color2.addActionListener(this);
 
-        this.positionComponent(0, 16, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), c, color3);
+        this.positionComponent(0, 15, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), c, color3);
         this.empty3.setBackground(Color.BLACK);
         this.empty3.setOpaque(true);
-        this.positionComponent(1, 16, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 5), c, empty3);
+        this.positionComponent(1, 15, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 5), c, empty3);
         this.color3.addActionListener(this);
 
-        this.positionComponent(0, 17, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), c, color4);
+        this.positionComponent(0, 16, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), c, color4);
         this.empty4.setBackground(Color.BLACK);
         this.empty4.setOpaque(true);
-        this.positionComponent(1, 17, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 5), c, empty4);
+        this.positionComponent(1, 16, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 5), c, empty4);
         this.color4.addActionListener(this);
 
-        this.positionComponent(0, 18, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 5, 5, 0), c, color5);
+        this.positionComponent(0, 17, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 5, 5, 0), c, color5);
         this.empty5.setBackground(Color.BLACK);
         this.empty5.setOpaque(true);
-        this.positionComponent(1, 18, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 5), c, empty5);
+        this.positionComponent(1, 17, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 5, 5), c, empty5);
         this.color5.addActionListener(this);
 
-        this.positionComponent(0, 19, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, apply_custom);
+        this.positionComponent(0, 18, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, apply_custom);
         this.apply_custom.addActionListener(this);
+
+        this.positionComponent(0, 19, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(30, 5, 5, 5), c, conv_label);
+        this.positionComponent(0, 20, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, separator3);
+
+        this.positionComponent(0, 21, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, filters);
+        this.positionComponent(0, 22, 2, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, dropdown);
+        this.positionComponent(2, 22, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, apply_filter);
+        this.apply_filter.addActionListener(this);
+
+        this.positionComponent(0, 23, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, tolerance);
+        this.positionComponent(0, 24, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), c, tolerance_slider);
+        this.tolerance_slider.addChangeListener(this);
+
+        this.positionComponent(0, 25, 3, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), c, apply_conv);
+        this.apply_conv.addActionListener(this);
+        formatJ2(apply_conv);
 
     }
 
@@ -232,14 +317,14 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
         this.fps_slider.setMajorTickSpacing(5);
         this.fps_slider.setPaintTicks(true);
         this.fps_slider.setPaintLabels(true);
-        this.fps_slider.setForeground(Color.BLACK);
+        this.fps_slider.setForeground(light);
 
         this.tolerance_slider = new JSlider(50, 200, 100);
         this.tolerance_slider.setMinorTickSpacing(5);
         this.tolerance_slider.setMajorTickSpacing(25);
         this.tolerance_slider.setPaintTicks(true);
         this.tolerance_slider.setPaintLabels(true);
-        this.tolerance_slider.setForeground(Color.BLACK);
+        this.tolerance_slider.setForeground(light);
     }
 
     private void addBackground(double[][] img_filter) {
@@ -305,7 +390,7 @@ public class ControlPanel extends JPanel implements ActionListener, ChangeListen
             this.fire_conv.viewer.setFirst(true);
         }
 
-        if (event.getActionCommand().equals("Apply")) {
+        if (event.getActionCommand().equals("Apply Filter")) {
             fire_conv.getViewer().setBackground(image, checkDropdown(option));
             this.fire_conv.viewer.setFirst(true);
         }

@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 import javax.imageio.ImageIO;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -121,8 +122,14 @@ public final class Fire {
     boolean apply_conv = false;
 
     public void setApply_conv(boolean apply_conv) {
-        this.flame_i = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
-        this.apply_conv = apply_conv;
+        if (this.flame_i != null) {
+
+            this.flame_i = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
+            this.apply_conv = apply_conv;
+        } else {
+            this.PRUEBA.controlPanel.apply_conv.setSelected(false);
+            JOptionPane.showMessageDialog(null, "Load an image first.");
+        }
     }
 
     public BufferedImage getFlame_i() {

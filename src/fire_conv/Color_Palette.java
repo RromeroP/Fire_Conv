@@ -91,7 +91,7 @@ public class Color_Palette {
         int result_g = 0;
         int result_b = 0;
 
-        int blends = 10;
+        int blends = 15;
 
         double blending_a;
         double blending_r;
