@@ -4,9 +4,16 @@
  */
 package fire_conv;
 
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.UnsupportedLookAndFeelException;
+import com.bulenkov.darcula.DarculaLaf;
 
 /**
  *
@@ -22,7 +29,18 @@ public class Fire_Conv extends JFrame {
     Fire fire;
 
     public static void main(String[] args) {
-        // TODO code application logic here
+        // TODO code application logic here    
+
+        for (LookAndFeelInfo look_feel : UIManager.getInstalledLookAndFeels()) {
+            System.out.println(look_feel.getName());
+        }
+
+        try {
+        UIManager.setLookAndFeel(new DarculaLaf());
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        
         Fire_Conv PRUEBA = new Fire_Conv();
     }
 
