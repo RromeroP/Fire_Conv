@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package fire_conv;
 
 import java.awt.Color;
@@ -15,11 +11,10 @@ import javax.swing.JOptionPane;
 
 /**
  *
- * @author Rex
+ * @author Rubén
  */
 public final class Fire {
 
-    //THREAD
     boolean running;
     boolean paused;
 
